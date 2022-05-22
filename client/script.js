@@ -1,7 +1,28 @@
+import { io } from "socket.io-client";
 const joinRoomButton = document.getElementById("room-button");
 const messageInput = document.getElementById("message-input");
 const roomInput = document.getElementById("room-input");
 const form = document.getElementById("form");
+
+const socket = io("http://localhost:3000")
+
+socket.on("connect", () => {
+    displayMessage(`Connected with id: ${socket.id}`)
+
+    emitMessageToCustomEvent();
+});
+
+socket.on("fetch-message", (obj) => { 
+    displayMessage(obj.message);
+});
+
+function emitMessageToCustomEvent() {
+    socket.emit("custom-event", { name: "Client1" });
+}
+
+function sendMessageViaSocket(message) {
+    socket.emit("send-message", { message });
+}
 
 form.addEventListener("submit", e => {
     e.preventDefault();
@@ -10,6 +31,7 @@ form.addEventListener("submit", e => {
 
     if (!message) return;
     displayMessage(message);
+    sendMessageViaSocket(message)
     messageInput.value = "";
 });
 
