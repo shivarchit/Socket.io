@@ -4,15 +4,15 @@ const messageInput = document.getElementById("message-input");
 const roomInput = document.getElementById("room-input");
 const form = document.getElementById("form");
 
-const socket = io("http://localhost:3000")
+const socket = io("http://localhost:3000");
 
 socket.on("connect", () => {
-    displayMessage(`Connected with id: ${socket.id}`)
+    displayMessage(`Connected with id: ${socket.id}`);
 
     emitMessageToCustomEvent();
 });
 
-socket.on("fetch-message", (obj) => { 
+socket.on("fetch-message", (obj) => {
     displayMessage(obj.message);
 });
 
@@ -20,8 +20,8 @@ function emitMessageToCustomEvent() {
     socket.emit("custom-event", { name: "Client1" });
 }
 
-function sendMessageViaSocket(message) {
-    socket.emit("send-message", { message });
+function sendMessageViaSocket(message, room) {
+    socket.emit("send-message", { message }, room);
 }
 
 form.addEventListener("submit", e => {
@@ -31,13 +31,16 @@ form.addEventListener("submit", e => {
 
     if (!message) return;
     displayMessage(message);
-    sendMessageViaSocket(message)
+    sendMessageViaSocket(message, room);
     messageInput.value = "";
 });
 
 joinRoomButton.addEventListener("click", e => {
     const room = roomInput.value;
-    console.log(room)
+    socket.emit("join-room", room, (message) => {
+        displayMessage(message);
+    });
+    console.log(room);
 });
 
 let displayMessage = (message) => {
